@@ -21,10 +21,12 @@ public class KDTree<E> {
         this.kDimension = kDimension;
     }
 
-    public void insert(E data) {}
+    public void insert(E data) {
+
+    }
 
     public LinkedList<E> find(double[] min, double[] max) {
-
+        return new LinkedList<>();
     }
 
     public int size() {
@@ -32,6 +34,6 @@ public class KDTree<E> {
     }
 
     public boolean isEmpty() {
-
+        return this.size == 0;
     }
 }

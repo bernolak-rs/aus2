@@ -83,7 +83,7 @@ public class QuadTree<E extends Point2D> {
                     this.ne = child;
                     break;
                 case SE:
-                    this.sw = child;
+                    this.se = child;
                     break;
                 case SW:
                     this.sw = child;
@@ -118,6 +118,7 @@ public class QuadTree<E extends Point2D> {
     private final double maxY;
     private final int maxDepth;
     private QTNode root;
+    private int size;
 
     public QuadTree(double minX, double maxX, double minY, double maxY, int maxDepth) {
         if (minX >= maxX || minY >= maxY) {
@@ -146,6 +147,9 @@ public class QuadTree<E extends Point2D> {
         double x = data.getX();
         double y = data.getY();
 
+        if (!Double.isFinite(x) || !Double.isFinite(y)) {
+           throw new IllegalArgumentException("Coordinates must be finite.");
+        }
         if (x < minX || x > maxX || y < minY || y > maxY) {
             throw new IllegalArgumentException("Point is outside of QuadTree bounds.");
         }
@@ -169,9 +173,18 @@ public class QuadTree<E extends Point2D> {
         }
 
         current.list.add(data);
+        this.size++;
     }
 
     public LinkedList<E> find(double minX, double maxX, double minY, double maxY) {
         return new LinkedList<>();
-    }    
+    }
+
+    public int size() {
+        return this.size;
+    }
+
+    public boolean isEmpty() {
+        return this.size == 0;
+    }
 }
