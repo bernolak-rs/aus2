@@ -159,9 +159,9 @@ public class QuadTree<E extends Point2D> {
 
         while (depth < maxDepth) {
             Quadrant q = current.getQuadrant(x, y);
-
             QTNode child = current.getChild(q);
 
+            
             if (child == null) {
                 child = current.createChild(q);
                 current.setChild(q, child);
