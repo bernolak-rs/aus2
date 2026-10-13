@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.util.List;
 
 
 public class QuadTree<E extends Point2D> {
@@ -176,7 +177,7 @@ public class QuadTree<E extends Point2D> {
         this.size++;
     }
 
-    public LinkedList<E> find(double minX, double maxX, double minY, double maxY) {
+    public List<E> find(double minX, double maxX, double minY, double maxY) {
         return new LinkedList<>();
     }
 
