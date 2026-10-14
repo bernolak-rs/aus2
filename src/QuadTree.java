@@ -1,8 +1,7 @@
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Objects;
 
-
-public class QuadTree<E extends Point2D> {
+public class QuadTree<E, K> {
     private enum Quadrant {
         NW,
         NE,
@@ -11,174 +10,149 @@ public class QuadTree<E extends Point2D> {
     }
 
     private class QTNode {
-        private final double minX;
-        private final double maxX;
-        private final double minY;
-        private final double maxY;
-        private LinkedList<E> list;
+        private final Bounds<K> bounds;
+        private final LinkedList<E> list = new LinkedList<>();
 
         private QTNode nw;
         private QTNode ne;
-        private QTNode se; 
+        private QTNode se;
         private QTNode sw;
-        
-        public QTNode(double minX, double maxX, double minY, double maxY) {
-            this.list = new LinkedList<>();
 
-            this.minX = minX;
-            this.maxX = maxX;
-            this.minY = minY;
-            this.maxY = maxY;
+        private K midX;
+        private K midY;
 
-            this.nw = null;
-            this.ne = null;
-            this.se = null;
-            this.sw = null;
+        QTNode(Bounds<K> bounds) {
+            this.bounds = bounds;
         }
 
-        private double centerX() {
-            return minX + (maxX - minX) / 2;
+        boolean isLeaf() {
+            return nw == null && ne == null
+                    && se == null && sw == null;
         }
 
-        private double centerY() {
-            return minY + (maxY - minY) / 2;
-        }
-
-        private Quadrant getQuadrant(double x, double y) {
-            boolean east = (this.centerX() <= x);
-            boolean north = (this.centerY() <= y);
-
-            if (north && east) 
-                return Quadrant.NE;
-            
-            if (north) 
-                return Quadrant.NW;
-            
-            if (!east)
-                return Quadrant.SW;
-            
-            return Quadrant.SE;
-        }
-
-        private QTNode getChild(Quadrant q) throws IllegalArgumentException {
-            switch (q) {
-                case NW:
-                    return this.nw;
-                case NE:
-                    return this.ne;
-                case SE:
-                    return this.se;
-                case SW:
-                    return this.sw;
-                default:
-                    throw new IllegalArgumentException();
-            }
-        }
-
-        private void setChild(Quadrant q, QTNode child) throws IllegalArgumentException {
-            switch (q) {
-                case NW:
-                    this.nw = child;
-                    break;
-                case NE:
-                    this.ne = child;
-                    break;
-                case SE:
-                    this.se = child;
-                    break;
-                case SW:
-                    this.sw = child;
-                    break;
-                default:
-                    throw new IllegalArgumentException();
-            } 
-        }
-
-        private QTNode createChild(Quadrant q) throws IllegalArgumentException {
-            double childX = centerX();
-            double childY = centerY();
-
-            switch (q) {
-                case NW:
-                    return new QTNode(minX, childX, childY, maxY);
-                case NE:
-                    return new QTNode(childX, maxX, childY, maxY); 
-                case SE:
-                    return new QTNode(childX, maxX, minY, childY); 
-                case SW:
-                    return new QTNode(minX, childX, minY, childY);
-                default:
-                    throw new IllegalArgumentException();
-            }
+        QTNode getChild(Quadrant quadrant) {
+            return switch (quadrant) {
+                case NW -> nw;
+                case NE -> ne;
+                case SE -> se;
+                case SW -> sw;
+            };
         }
     }
 
-    private final double minX;
-    private final double maxX;
-    private final double minY;
-    private final double maxY;
+    private final SpatialAdapter<E, K> adapter;
+    private final CoordinateOps<K> ops;
     private final int maxDepth;
-    private QTNode root;
+
+    private final QTNode root;
     private int size;
 
-    public QuadTree(double minX, double maxX, double minY, double maxY, int maxDepth) {
-        if (minX >= maxX || minY >= maxY) {
-            throw new IllegalArgumentException("Minimum boundaries must be smaller than maximum boundaries.");
+    public QuadTree(Bounds<K> bounds, SpatialAdapter<E, K> adapter, CoordinateOps<K> ops, int maxDepth) {
+        if (bounds == null || bounds.minX() == null || bounds.maxX() == null
+                || bounds.minY() == null || bounds.maxY() == null) {
+            throw new NullPointerException("Bounds and their coordinates cannot be null");
         }
+        this.adapter = Objects.requireNonNull(adapter, "Spatial adapter cannot be null");
+        this.ops = Objects.requireNonNull(ops, "Coordinate operations cannot be null");
+
         if (maxDepth < 0) {
-            throw new IllegalArgumentException("Max depth can't be negative");
+            throw new IllegalArgumentException("Maximum depth cannot be negative");
+        }
+        if (ops.compare(bounds.minX(), bounds.maxX()) >= 0
+                || ops.compare(bounds.minY(), bounds.maxY()) >= 0) {
+            throw new IllegalArgumentException("Minimum boundaries must be smaller than maximum boundaries");
         }
 
-        this.minX = minX;
-        this.maxX = maxX;
-        this.minY = minY;
-        this.maxY = maxY;
         this.maxDepth = maxDepth;
-        this.root = new QTNode(minX, maxX, minY, maxY);
+        this.root = new QTNode(bounds);
     }
 
-    public QuadTree(double minX, double maxX, double minY, double maxY) {
-        this(minX, maxX, minY, maxY, 32);
-    }
-
-    public void insert(E data) throws IllegalArgumentException {
-        if (data == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+    public void insert(E object) {
+        if (object == null) {
+            throw new NullPointerException("Object cannot be null");
         }
-        double x = data.getX();
-        double y = data.getY();
+        Bounds<K> bounds = adapter.boundsOf(object);
 
-        if (!Double.isFinite(x) || !Double.isFinite(y)) {
-           throw new IllegalArgumentException("Coordinates must be finite.");
+        if (bounds == null || bounds.minX() == null || bounds.maxX() == null
+                || bounds.minY() == null || bounds.maxY() == null) {
+            throw new NullPointerException("Bounds and their coordinates cannot be null");
         }
-        if (x < minX || x > maxX || y < minY || y > maxY) {
-            throw new IllegalArgumentException("Point is outside of QuadTree bounds.");
+
+        if (ops.compare(bounds.minX(), bounds.maxX()) != 0
+                || ops.compare(bounds.minY(), bounds.maxY()) != 0) {
+            throw new IllegalArgumentException("Only points are supported");
+        }
+
+        K x = bounds.minX();
+        K y = bounds.minY();
+
+        Bounds<K> space = root.bounds;
+
+        if (ops.compare(x, space.minX()) < 0
+                || ops.compare(x, space.maxX()) > 0
+                || ops.compare(y, space.minY()) < 0
+                || ops.compare(y, space.maxY()) > 0) {
+            throw new IllegalArgumentException("Point is outside tree bounds");
         }
 
         QTNode current = root;
         int depth = 0;
 
-        while (depth < maxDepth) {
-            Quadrant q = current.getQuadrant(x, y);
-            QTNode child = current.getChild(q);
+        while (true) {
+            if (!current.isLeaf()) {
+                Quadrant quadrant = getQuadrant(current, x, y);
+                current = current.getChild(quadrant);
+                depth++;
+                continue;
+            }
 
-            
-            if (child == null) {
-                child = current.createChild(q);
-                current.setChild(q, child);
-                child.list.add(data);
+            if (current.list.isEmpty() || depth == maxDepth) {
+                current.list.add(object);
+                size++;
                 return;
             }
-            current = child;
-            depth++;
+
+            E previous = current.list.getFirst();
+            Bounds<K> previousBounds = adapter.boundsOf(previous);
+
+            split(current);
+
+            Quadrant previousQuadrant = getQuadrant(
+                    current, previousBounds.minX(), previousBounds.minY());
+
+            current.getChild(previousQuadrant).list.add(previous);
+            current.list.removeFirst();
+        }
+    }
+    
+    private Quadrant getQuadrant(QTNode node, K x, K y) {
+        boolean east = ops.compare(x, node.midX) >= 0;
+        boolean north = ops.compare(y, node.midY) >= 0;
+
+        if (north) {
+            return east ? Quadrant.NE : Quadrant.NW;
         }
 
-        current.list.add(data);
-        this.size++;
+        return east ? Quadrant.SE : Quadrant.SW;
     }
 
-    public List<E> find(double minX, double maxX, double minY, double maxY) {
-        return new LinkedList<>();
+    private void split(QTNode node) {
+        Bounds<K> b = node.bounds;
+
+        node.midX = ops.midpoint(b.minX(), b.maxX());
+        node.midY = ops.midpoint(b.minY(), b.maxY());
+
+        node.nw = new QTNode(new Bounds<>(
+                b.minX(), node.midX, node.midY, b.maxY()));
+
+        node.ne = new QTNode(new Bounds<>(
+                node.midX, b.maxX(), node.midY, b.maxY()));
+
+        node.se = new QTNode(new Bounds<>(
+                node.midX, b.maxX(), b.minY(), node.midY));
+
+        node.sw = new QTNode(new Bounds<>(
+                b.minX(), node.midX, b.minY(), node.midY));
     }
 
     public int size() {
