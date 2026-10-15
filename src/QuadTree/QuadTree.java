@@ -1,3 +1,5 @@
+package QuadTree;
+
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -142,17 +144,13 @@ public class QuadTree<E, K> {
         node.midX = ops.midpoint(b.minX(), b.maxX());
         node.midY = ops.midpoint(b.minY(), b.maxY());
 
-        node.nw = new QTNode(new Bounds<>(
-                b.minX(), node.midX, node.midY, b.maxY()));
+        node.nw = new QTNode(new Bounds<>(b.minX(), node.midX, node.midY, b.maxY()));
 
-        node.ne = new QTNode(new Bounds<>(
-                node.midX, b.maxX(), node.midY, b.maxY()));
+        node.ne = new QTNode(new Bounds<>(node.midX, b.maxX(), node.midY, b.maxY()));
 
-        node.se = new QTNode(new Bounds<>(
-                node.midX, b.maxX(), b.minY(), node.midY));
+        node.se = new QTNode(new Bounds<>(node.midX, b.maxX(), b.minY(), node.midY));
 
-        node.sw = new QTNode(new Bounds<>(
-                b.minX(), node.midX, b.minY(), node.midY));
+        node.sw = new QTNode(new Bounds<>(b.minX(), node.midX, b.minY(), node.midY));
     }
 
     public int size() {

@@ -1,3 +1,5 @@
+package QuadTree;
+
 public interface CoordinateOps<K> {
     int compare(K first, K second);
 
