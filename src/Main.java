@@ -1,7 +1,7 @@
-import QuadTree.Bounds;
-import QuadTree.QuadTree;
+import tester.TesterCli;
 
 public class Main {
     public static void main(String[] args) {
+        new TesterCli().start();
     }
 }

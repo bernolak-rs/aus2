@@ -1,6 +1,5 @@
 package KDTree;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class KDTree<E> {
             throw new IllegalArgumentException("Data inserted to KDTree cannot be null");
         }
 
-        List<E> sorted = new ArrayList<>(data);
+        List<E> sorted = new LinkedList<>(data);
 
         for (E item : sorted) {
             if (item == null)
@@ -74,8 +73,8 @@ public class KDTree<E> {
 
         KDNode newRoot = new KDNode(null);
 
-        List<KDNode> nodes = new ArrayList<>();
-        List<int[]> ranges = new ArrayList<>();
+        List<KDNode> nodes = new LinkedList<>();
+        List<int[]> ranges = new LinkedList<>();
 
         nodes.add(newRoot);
         ranges.add(new int[] {0, data.size(), 0});
@@ -92,7 +91,7 @@ public class KDTree<E> {
             data.subList(from, to).sort(
                 (a, b) -> compareToSort(a, b, dimension)
             );
-
+            
             int middle = from + (to - from) / 2;
             node.data = data.get(middle);
 
@@ -162,8 +161,66 @@ public class KDTree<E> {
         return true;
     }
 
+    //TODO
     public List<E> find(E min, E max) {
-        return new LinkedList<>();
+        if (min == null || max == null) {
+            throw new NullPointerException("Search boundaries cannot be null");
+        }
+
+        for (int dimension = 0; dimension < dimensions; dimension++) {
+            if (comparator.compare(min, max, dimension) > 0) {
+                throw new IllegalArgumentException(
+                        "Minimum boundaries cannot exceed maximum boundaries");
+            }
+        }
+
+        List<E> result = new LinkedList<>();
+
+        if (root == null) {
+            return result;
+        }
+
+        List<KDNode> nodes = new LinkedList<>();
+        List<Integer> axes = new LinkedList<>();
+
+        nodes.add(root);
+        axes.add(0);
+
+        for (int i = 0; i < nodes.size(); i++) {
+            KDNode current = nodes.get(i);
+            int axis = axes.get(i);
+            int nextAxis = (axis + 1) % dimensions;
+
+            if (isInRange(current.data, min, max)) {
+                result.add(current.data);
+            }
+
+            if (current.left != null
+                    && comparator.compare(min, current.data, axis) <= 0) {
+                nodes.add(current.left);
+                axes.add(nextAxis);
+            }
+
+            if (current.right != null
+                    && comparator.compare(max, current.data, axis) >= 0) {
+                nodes.add(current.right);
+                axes.add(nextAxis);
+            }
+        }
+
+        return result;
+    }
+
+    // TODO
+    private boolean isInRange(E object, E min, E max) {
+        for (int dimension = 0; dimension < dimensions; dimension++) {
+            if (comparator.compare(object, min, dimension) < 0
+                    || comparator.compare(object, max, dimension) > 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public int size() {
@@ -172,5 +229,30 @@ public class KDTree<E> {
 
     public boolean isEmpty() {
         return this.size == 0;
+    }
+
+    public List<E> getAll() {
+        List<E> result = new LinkedList<>();
+
+        if (root == null) {
+            return result;
+        }
+
+        List<KDNode> nodes = new LinkedList<>();
+        nodes.add(root);
+
+        while (!nodes.isEmpty()) {
+            KDNode current = nodes.removeFirst();
+            result.add(current.data);
+
+            if (current.left != null) {
+                nodes.add(current.left);
+            }
+            if (current.right != null) {
+                nodes.add(current.right);
+            }
+        }
+
+        return result;
     }
 }

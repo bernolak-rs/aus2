@@ -1,6 +1,8 @@
 package QuadTree;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 public class QuadTree<E, K> {
@@ -62,7 +64,7 @@ public class QuadTree<E, K> {
         }
         if (ops.compare(bounds.minX(), bounds.maxX()) >= 0
                 || ops.compare(bounds.minY(), bounds.maxY()) >= 0) {
-            throw new IllegalArgumentException("Minimum boundaries must be smaller than maximum boundaries");
+            throw new  IllegalArgumentException("Minimum boundaries must be smaller than maximum boundaries");
         }
 
         this.maxDepth = maxDepth;
@@ -151,6 +153,71 @@ public class QuadTree<E, K> {
         node.se = new QTNode(new Bounds<>(node.midX, b.maxX(), b.minY(), node.midY));
 
         node.sw = new QTNode(new Bounds<>(b.minX(), node.midX, b.minY(), node.midY));
+    }
+
+    /**
+     * Find metody
+     */
+
+    public List<E> find(Bounds<K> area) {
+        if (area == null || area.minX() == null || area.maxX() == null
+            || area.minY() == null || area.maxY() == null) {
+            throw new NullPointerException("Search bounds and their coordinates cannot be null");
+        }
+
+        if (ops.compare(area.minX(), area.maxX()) > 0
+                || ops.compare(area.minY(), area.maxY()) > 0) {
+            throw new IllegalArgumentException(
+                    "Minimum boundaries cannot exceed maximum boundaries");
+        }
+
+        List<E> result = new ArrayList<>();
+        List<QTNode> nodes = new ArrayList<>();
+        nodes.add(root);
+
+        for (int i = 0; i < nodes.size(); i++) {
+            QTNode curr = nodes.get(i);
+
+            if (!intersects(curr.bounds, area)) {
+                continue;
+            }
+
+            for (E item : curr.list) {
+                Bounds<K> objectBounds = adapter.boundsOf(item);
+
+                if (intersects(objectBounds, area)) {
+                    result.add(item);
+                }
+            }
+
+            if (curr.nw != null) {
+                nodes.add(curr.nw);
+            }
+            if (curr.ne != null) {
+                nodes.add(curr.ne);
+            }
+            if (curr.se != null) {
+                nodes.add(curr.se);
+            }
+            if (curr.sw != null) {
+                nodes.add(curr.sw);
+            }
+        }
+        return result;
+    }
+
+    private boolean intersects(Bounds<K> first, Bounds<K> second) {
+        return ops.compare(first.minX(), second.maxX()) <= 0
+                && ops.compare(first.maxX(), second.minX()) >= 0
+                && ops.compare(first.minY(), second.maxY()) <= 0
+                && ops.compare(first.maxY(), second.minY()) >= 0;
+    }
+
+    /**
+     * Pomocne metody
+     */
+    public List<E> getAll() {
+        return find(root.bounds);
     }
 
     public int size() {
