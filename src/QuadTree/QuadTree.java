@@ -30,16 +30,16 @@ public class QuadTree<E, K> {
         }
 
         boolean isLeaf() {
-            return nw == null && ne == null
-                    && se == null && sw == null;
+            return this.nw == null && this.ne == null
+                    && this.se == null && this.sw == null;
         }
 
         QTNode getChild(Quadrant quadrant) {
             return switch (quadrant) {
-                case NW -> nw;
-                case NE -> ne;
-                case SE -> se;
-                case SW -> sw;
+                case NW -> this.nw;
+                case NE -> this.ne;
+                case SE -> this.se;
+                case SW -> this.sw;
             };
         }
     }
@@ -62,9 +62,9 @@ public class QuadTree<E, K> {
         if (maxDepth < 0) {
             throw new IllegalArgumentException("Maximum depth cannot be negative");
         }
-        if (ops.compare(bounds.minX(), bounds.maxX()) >= 0
-                || ops.compare(bounds.minY(), bounds.maxY()) >= 0) {
-            throw new  IllegalArgumentException("Minimum boundaries must be smaller than maximum boundaries");
+        if (this.ops.compare(bounds.minX(), bounds.maxX()) >= 0
+                || this.ops.compare(bounds.minY(), bounds.maxY()) >= 0) {
+            throw new IllegalArgumentException("Minimum boundaries must be smaller than maximum boundaries");
         }
 
         this.maxDepth = maxDepth;
@@ -75,76 +75,76 @@ public class QuadTree<E, K> {
         if (object == null) {
             throw new NullPointerException("Object cannot be null");
         }
-        Bounds<K> bounds = adapter.boundsOf(object);
+        Bounds<K> bounds = this.adapter.boundsOf(object);
 
         if (bounds == null || bounds.minX() == null || bounds.maxX() == null
                 || bounds.minY() == null || bounds.maxY() == null) {
             throw new NullPointerException("Bounds and their coordinates cannot be null");
         }
 
-        if (ops.compare(bounds.minX(), bounds.maxX()) != 0
-                || ops.compare(bounds.minY(), bounds.maxY()) != 0) {
+        if (this.ops.compare(bounds.minX(), bounds.maxX()) != 0
+                || this.ops.compare(bounds.minY(), bounds.maxY()) != 0) {
             throw new IllegalArgumentException("Only points are supported");
         }
 
         K x = bounds.minX();
         K y = bounds.minY();
 
-        Bounds<K> space = root.bounds;
+        Bounds<K> space = this.root.bounds;
 
-        if (ops.compare(x, space.minX()) < 0
-                || ops.compare(x, space.maxX()) > 0
-                || ops.compare(y, space.minY()) < 0
-                || ops.compare(y, space.maxY()) > 0) {
+        if (this.ops.compare(x, space.minX()) < 0
+                || this.ops.compare(x, space.maxX()) > 0
+                || this.ops.compare(y, space.minY()) < 0
+                || this.ops.compare(y, space.maxY()) > 0) {
             throw new IllegalArgumentException("Point is outside tree bounds");
         }
 
-        QTNode current = root;
+        QTNode current = this.root;
         int depth = 0;
 
         while (true) {
             if (!current.isLeaf()) {
-                Quadrant quadrant = getQuadrant(current, x, y);
+                Quadrant quadrant = this.getQuadrant(current, x, y);
                 current = current.getChild(quadrant);
                 depth++;
                 continue;
             }
 
-            if (current.list.isEmpty() || depth == maxDepth) {
+            if (current.list.isEmpty() || depth == this.maxDepth) {
                 current.list.add(object);
-                size++;
+                this.size++;
                 return;
             }
 
             E previous = current.list.getFirst();
-            Bounds<K> previousBounds = adapter.boundsOf(previous);
+            Bounds<K> previousBounds = this.adapter.boundsOf(previous);
 
-            split(current);
+            this.split(current);
 
-            Quadrant previousQuadrant = getQuadrant(
+            Quadrant previousQuadrant = this.getQuadrant(
                     current, previousBounds.minX(), previousBounds.minY());
 
             current.getChild(previousQuadrant).list.add(previous);
             current.list.removeFirst();
         }
     }
-    
+
     private Quadrant getQuadrant(QTNode node, K x, K y) {
-        boolean east = ops.compare(x, node.midX) >= 0;
-        boolean north = ops.compare(y, node.midY) >= 0;
+        boolean west = this.ops.compare(x, node.midX) < 0;
+        boolean north = this.ops.compare(y, node.midY) >= 0;
 
         if (north) {
-            return east ? Quadrant.NE : Quadrant.NW;
+            return west ? Quadrant.NE : Quadrant.NW;
+        } else {
+            return west ? Quadrant.SE : Quadrant.SW;
         }
-
-        return east ? Quadrant.SE : Quadrant.SW;
     }
 
     private void split(QTNode node) {
         Bounds<K> b = node.bounds;
 
-        node.midX = ops.midpoint(b.minX(), b.maxX());
-        node.midY = ops.midpoint(b.minY(), b.maxY());
+        node.midX = this.ops.midpoint(b.minX(), b.maxX());
+        node.midY = this.ops.midpoint(b.minY(), b.maxY());
 
         node.nw = new QTNode(new Bounds<>(b.minX(), node.midX, node.midY, b.maxY()));
 
@@ -161,31 +161,31 @@ public class QuadTree<E, K> {
 
     public List<E> find(Bounds<K> area) {
         if (area == null || area.minX() == null || area.maxX() == null
-            || area.minY() == null || area.maxY() == null) {
+                || area.minY() == null || area.maxY() == null) {
             throw new NullPointerException("Search bounds and their coordinates cannot be null");
         }
 
-        if (ops.compare(area.minX(), area.maxX()) > 0
-                || ops.compare(area.minY(), area.maxY()) > 0) {
+        if (this.ops.compare(area.minX(), area.maxX()) > 0
+                || this.ops.compare(area.minY(), area.maxY()) > 0) {
             throw new IllegalArgumentException(
                     "Minimum boundaries cannot exceed maximum boundaries");
         }
 
         List<E> result = new ArrayList<>();
         List<QTNode> nodes = new ArrayList<>();
-        nodes.add(root);
+        nodes.add(this.root);
 
         for (int i = 0; i < nodes.size(); i++) {
             QTNode curr = nodes.get(i);
 
-            if (!intersects(curr.bounds, area)) {
+            if (!this.intersects(curr.bounds, area)) {
                 continue;
             }
 
             for (E item : curr.list) {
-                Bounds<K> objectBounds = adapter.boundsOf(item);
+                Bounds<K> objectBounds = this.adapter.boundsOf(item);
 
-                if (intersects(objectBounds, area)) {
+                if (this.intersects(objectBounds, area)) {
                     result.add(item);
                 }
             }
@@ -207,17 +207,17 @@ public class QuadTree<E, K> {
     }
 
     private boolean intersects(Bounds<K> first, Bounds<K> second) {
-        return ops.compare(first.minX(), second.maxX()) <= 0
-                && ops.compare(first.maxX(), second.minX()) >= 0
-                && ops.compare(first.minY(), second.maxY()) <= 0
-                && ops.compare(first.maxY(), second.minY()) >= 0;
+        return this.ops.compare(first.minX(), second.maxX()) <= 0
+                && this.ops.compare(first.maxX(), second.minX()) >= 0
+                && this.ops.compare(first.minY(), second.maxY()) <= 0
+                && this.ops.compare(first.maxY(), second.minY()) >= 0;
     }
 
     /**
      * Pomocne metody
      */
     public List<E> getAll() {
-        return find(root.bounds);
+        return this.find(this.root.bounds);
     }
 
     public int size() {

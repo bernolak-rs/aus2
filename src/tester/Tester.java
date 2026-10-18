@@ -15,7 +15,7 @@ public final class Tester<E> {
         int step = 0;
 
         try {
-            check(structure, expected);
+            this.check(structure, expected);
 
             for (E object : data) {
                 step++;
@@ -23,7 +23,7 @@ public final class Tester<E> {
                 expected.add(object);
 
                 if (step % checkEvery == 0 || step == data.size()) {
-                    check(structure, expected);
+                    this.check(structure, expected);
                 }
             }
         } catch (RuntimeException | AssertionError error) {
@@ -31,13 +31,12 @@ public final class Tester<E> {
         }
     }
 
-    private void check(StructureAdapter<E> structure, List<E> expected) {
+    private void check(StructureAdapter<E> structure, List<E> expected) throws AssertionError {
         if (structure.size() != expected.size()) {
-            throw new AssertionError("Incorrect size: expected=" + expected.size()
-                    + ", actual=" + structure.size());
+            throw new AssertionError("Incorrect size: expected=" + expected.size() + ", actual=" + structure.size());
         }
 
-        if (!counts(expected).equals(counts(structure.getAll()))) {
+        if (!this.counts(expected).equals(this.counts(structure.getAll()))) {
             throw new AssertionError("GetAll contents differ from the reference data");
         }
     }

@@ -40,24 +40,26 @@ public class KDTree<E> {
                 throw new IllegalArgumentException("Data inserted to KDTree cannot be null");
         }
 
-        sorted.sort((a, b) -> compareToSort(a, b, 0));
+        sorted.sort((a, b) -> this.compareToSort(a, b, 0));
 
-        for (int i = 1; i < sorted.size(); i++) {
-            if (compareToSort(sorted.get(i - 1), sorted.get(i), 0) == 0) {
+        E previous = null;
+        for (E item : sorted) {
+            if (previous != null && this.compareToSort(previous, item, 0) == 0) {
                 throw new IllegalArgumentException("Keys cannot be duplicated");
             }
+            previous = item;
         }
 
-        KDNode newRoot = buildBalanced(sorted);
+        KDNode newRoot = this.buildBalanced(sorted);
 
-        root = newRoot;
-        size = sorted.size();
+        this.root = newRoot;
+        this.size = sorted.size();
     }
 
     private int compareToSort(E first, E second, int dimension) {
-        for (int offset = 0; offset < dimensions; offset++) {
-            int axis = (dimension + offset) % dimensions;
-            int result = comparator.compare(first, second, axis);
+        for (int offset = 0; offset < this.dimensions; offset++) {
+            int axis = (dimension + offset) % this.dimensions;
+            int result = this.comparator.compare(first, second, axis);
 
             if (result != 0) {
                 return result;
@@ -79,17 +81,17 @@ public class KDTree<E> {
         nodes.add(newRoot);
         ranges.add(new int[] {0, data.size(), 0});
 
-        for (int i = 0; i < nodes.size(); i++) {
-            KDNode node = nodes.get(i);
-            int[] range = ranges.get(i);
+        while (!nodes.isEmpty()) {
+            KDNode node = nodes.removeFirst();
+            int[] range = ranges.removeFirst();
 
             int from = range[0];
             int to = range[1];
             int depth = range[2];
-            int dimension = depth % dimensions;
+            int dimension = depth % this.dimensions;
 
             data.subList(from, to).sort(
-                (a, b) -> compareToSort(a, b, dimension)
+                (a, b) -> this.compareToSort(a, b, dimension)
             );
             
             int middle = from + (to - from) / 2;
@@ -118,20 +120,22 @@ public class KDTree<E> {
             throw new IllegalArgumentException("Data inserted to KDTree cannot be null");
         }
 
-        if (root == null) {
-            root = new KDNode(data);
-            size++;
+        if (this.root == null) {
+            this.root = new KDNode(data);
+            this.size++;
             return;
         }
 
-        KDNode curr = root;
+        KDNode curr = this.root;
         int depth = 0;
 
         while (true) {
-            if (this.contains(data, curr.data)) { throw new IllegalArgumentException("Keys cannot be duplicated"); }
+            if (this.contains(data, curr.data)) { 
+                throw new IllegalArgumentException("Keys cannot be duplicated");
+            }
             
-            int dimension = depth % dimensions;
-            int result = comparator.compare(data, curr.data, dimension);
+            int dimension = depth % this.dimensions;
+            int result = this.comparator.compare(data, curr.data, dimension);
             
             boolean goLeft = result <= 0;
             KDNode next = goLeft ? curr.left : curr.right;
@@ -144,7 +148,7 @@ public class KDTree<E> {
                 } else {
                     curr.right = node;
                 }
-                size++;
+                this.size++;
                 return;
             }
 
@@ -154,8 +158,8 @@ public class KDTree<E> {
     }
 
     private boolean contains(E first, E second) {
-        for (int i = 0; i < dimensions; i++) {
-            if (comparator.compare(first, second, i) != 0)
+        for (int i = 0; i < this.dimensions; i++) {
+            if (this.comparator.compare(first, second, i) != 0)
                 return false;
         }
         return true;
@@ -167,8 +171,8 @@ public class KDTree<E> {
             throw new NullPointerException("Search boundaries cannot be null");
         }
 
-        for (int dimension = 0; dimension < dimensions; dimension++) {
-            if (comparator.compare(min, max, dimension) > 0) {
+        for (int dimension = 0; dimension < this.dimensions; dimension++) {
+            if (this.comparator.compare(min, max, dimension) > 0) {
                 throw new IllegalArgumentException(
                         "Minimum boundaries cannot exceed maximum boundaries");
             }
@@ -176,33 +180,33 @@ public class KDTree<E> {
 
         List<E> result = new LinkedList<>();
 
-        if (root == null) {
+        if (this.root == null) {
             return result;
         }
 
         List<KDNode> nodes = new LinkedList<>();
         List<Integer> axes = new LinkedList<>();
 
-        nodes.add(root);
+        nodes.add(this.root);
         axes.add(0);
 
         for (int i = 0; i < nodes.size(); i++) {
             KDNode current = nodes.get(i);
             int axis = axes.get(i);
-            int nextAxis = (axis + 1) % dimensions;
+            int nextAxis = (axis + 1) % this.dimensions;
 
-            if (isInRange(current.data, min, max)) {
+            if (this.isInRange(current.data, min, max)) {
                 result.add(current.data);
             }
 
             if (current.left != null
-                    && comparator.compare(min, current.data, axis) <= 0) {
+                    && this.comparator.compare(min, current.data, axis) <= 0) {
                 nodes.add(current.left);
                 axes.add(nextAxis);
             }
 
             if (current.right != null
-                    && comparator.compare(max, current.data, axis) >= 0) {
+                    && this.comparator.compare(max, current.data, axis) >= 0) {
                 nodes.add(current.right);
                 axes.add(nextAxis);
             }
@@ -213,9 +217,9 @@ public class KDTree<E> {
 
     // TODO
     private boolean isInRange(E object, E min, E max) {
-        for (int dimension = 0; dimension < dimensions; dimension++) {
-            if (comparator.compare(object, min, dimension) < 0
-                    || comparator.compare(object, max, dimension) > 0) {
+        for (int dimension = 0; dimension < this.dimensions; dimension++) {
+            if (this.comparator.compare(object, min, dimension) < 0
+                    || this.comparator.compare(object, max, dimension) > 0) {
                 return false;
             }
         }
@@ -234,12 +238,12 @@ public class KDTree<E> {
     public List<E> getAll() {
         List<E> result = new LinkedList<>();
 
-        if (root == null) {
+        if (this.root == null) {
             return result;
         }
 
         List<KDNode> nodes = new LinkedList<>();
-        nodes.add(root);
+        nodes.add(this.root);
 
         while (!nodes.isEmpty()) {
             KDNode current = nodes.removeFirst();
