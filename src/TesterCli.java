@@ -47,7 +47,8 @@ public final class TesterCli {
     private boolean handleCommand(String line) {
         String[] parts = line.split(" ");
         String command = parts[0].toLowerCase();
-        if (Set.of("run", "show", "help", "exit").contains(command) && parts.length != 1) {
+        if (Set.of("run", "show", "help", "h", "?", "exit", "q", "quit").contains(command)
+                && parts.length != 1) {
             throw new IllegalArgumentException("Prikaz " + command + " nema argumenty");
         }
 
@@ -88,9 +89,13 @@ public final class TesterCli {
                 this.printSettings();
                 return true;
             case "help":
+            case "h":
+            case "?":
                 TesterCli.printHelp();
                 return true;
             case "exit":
+            case "q":
+            case "quit":
                 return false;
             default:
                 throw new IllegalArgumentException("Neznamy prikaz. Pouzi help");
@@ -136,8 +141,8 @@ public final class TesterCli {
             depth N             Maximálna hĺbka QuadTree (N >= 0)
             tree kd|quad|both   Vyber testované stromy
             show                Zobraz nastavenia
-            help                Zobraz príkazy
-            exit                Ukonči tester
+            help|h|?            Zobraz príkazy
+            exit|q|quit         Ukonči tester
         """);
     }
 
