@@ -1,6 +1,5 @@
 package QuadTree;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -134,9 +133,9 @@ public class QuadTree<E, K> {
         boolean north = this.ops.compare(y, node.midY) >= 0;
 
         if (north) {
-            return west ? Quadrant.NE : Quadrant.NW;
+            return west ? Quadrant.NW : Quadrant.NE;
         } else {
-            return west ? Quadrant.SE : Quadrant.SW;
+            return west ? Quadrant.SW : Quadrant.SE;
         }
     }
 
@@ -171,12 +170,12 @@ public class QuadTree<E, K> {
                     "Minimum boundaries cannot exceed maximum boundaries");
         }
 
-        List<E> result = new ArrayList<>();
-        List<QTNode> nodes = new ArrayList<>();
+        List<E> result = new LinkedList<>();
+        LinkedList<QTNode> nodes = new LinkedList<>();
         nodes.add(this.root);
 
-        for (int i = 0; i < nodes.size(); i++) {
-            QTNode curr = nodes.get(i);
+        while (!nodes.isEmpty()) {
+            QTNode curr = nodes.removeFirst();
 
             if (!this.intersects(curr.bounds, area)) {
                 continue;
@@ -208,9 +207,9 @@ public class QuadTree<E, K> {
 
     private boolean intersects(Bounds<K> first, Bounds<K> second) {
         return this.ops.compare(first.minX(), second.maxX()) <= 0
-                && this.ops.compare(first.maxX(), second.minX()) >= 0
-                && this.ops.compare(first.minY(), second.maxY()) <= 0
-                && this.ops.compare(first.maxY(), second.minY()) >= 0;
+            && this.ops.compare(first.maxX(), second.minX()) >= 0
+            && this.ops.compare(first.minY(), second.maxY()) <= 0
+            && this.ops.compare(first.maxY(), second.minY()) >= 0;
     }
 
     /**

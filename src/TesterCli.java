@@ -47,10 +47,6 @@ public final class TesterCli {
     private boolean handleCommand(String line) {
         String[] parts = line.split(" ");
         String command = parts[0].toLowerCase();
-        if (Set.of("run", "show", "help", "h", "?", "exit", "q", "quit").contains(command)
-                && parts.length != 1) {
-            throw new IllegalArgumentException("Prikaz " + command + " nema argumenty");
-        }
 
         switch (command) {
             case "seed": {
@@ -98,7 +94,7 @@ public final class TesterCli {
             case "quit":
                 return false;
             default:
-                throw new IllegalArgumentException("Neznamy prikaz. Pouzi help");
+                throw new IllegalArgumentException("Neznamy prikaz - Pouzi help pre vypisanie prikazov");
         }
 
         this.printSettings();
@@ -148,16 +144,16 @@ public final class TesterCli {
 
     private void runTests() {
         this.printSettings();
-        for (TreeTester.Result result : new TreeTester().run(
+
+        TreeTester tester = new TreeTester(
                 this.seed, this.seedCount, this.pointCount, this.coordinateLimit,
-                this.checkEvery, this.maxDepth, this.tree)) {
+                this.checkEvery, this.maxDepth, this.tree);
+
+        for (TreeTester.Result result : tester.run()) {
             if (result.error() == null) {
-                System.out.println(result.name() + " OK: seed=" + result.seed() + ", size=" + result.size());
+                System.out.println(result.name() + "OK: seed=" + result.seed() + ", size=" + result.size());
             } else {
-                System.out.println(result.name() + " ZLYHAL: seed=" + result.seed() + ", " + result.error().getMessage());
-                for (Throwable cause = result.error().getCause(); cause != null; cause = cause.getCause()) {
-                    System.out.println("  " + cause);
-                }
+                System.out.println(result.name() + "ZLYHAL: seed=" + result.seed() + ", " + result.error().getMessage());
             }
         }
     }
