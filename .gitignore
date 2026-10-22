@@ -9,4 +9,6 @@
 /dataSources/
 /dataSources.local.xml
 /out/
+/bin/
+.DS_Store
 /.idea/
