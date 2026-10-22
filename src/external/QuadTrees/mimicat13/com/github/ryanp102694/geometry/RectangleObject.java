@@ -1,4 +1,4 @@
-package com.github.ryanp102694.geometry;
+package external.QuadTrees.mimicat13.com.github.ryanp102694.geometry;
 
 /**
  *  Objects inserted into the QuadTree must implement this interface

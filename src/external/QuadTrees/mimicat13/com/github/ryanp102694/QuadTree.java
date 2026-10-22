@@ -1,8 +1,8 @@
-package com.github.ryanp102694;
+package external.QuadTrees.mimicat13.com.github.ryanp102694;
 
-import com.github.ryanp102694.geometry.GeometryUtil;
-import com.github.ryanp102694.geometry.RectangleObject;
-import com.github.ryanp102694.geometry.SearchRectangleObject;
+import external.QuadTrees.mimicat13.com.github.ryanp102694.geometry.GeometryUtil;
+import external.QuadTrees.mimicat13.com.github.ryanp102694.geometry.RectangleObject;
+import external.QuadTrees.mimicat13.com.github.ryanp102694.geometry.SearchRectangleObject;
 
 import java.util.ArrayList;
 import java.util.List;

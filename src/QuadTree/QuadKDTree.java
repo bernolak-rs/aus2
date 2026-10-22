@@ -67,6 +67,7 @@ public class QuadKDTree<E, K> {
         }
         this.adapter = Objects.requireNonNull(adapter, "Spatial adapter cannot be null");
         this.ops = Objects.requireNonNull(ops, "Coordinate operations cannot be null");
+        this.comparator = Objects.requireNonNull(comparator, "Comparator cannot be null");
 
         if (maxDepth < 0) {
             throw new IllegalArgumentException("Maximum depth cannot be negative");
@@ -142,7 +143,6 @@ public class QuadKDTree<E, K> {
             }
 
             current.kdTree = null;
-            current.kdTree = new KDTree<>(2, this.comparator);
         }
     }
 

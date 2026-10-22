@@ -42,14 +42,6 @@ public class KDTree<E> {
 
         sorted.sort((a, b) -> this.compareToSort(a, b, 0));
 
-        E previous = null;
-        for (E item : sorted) {
-            if (previous != null && this.compareToSort(previous, item, 0) == 0) {
-                throw new IllegalArgumentException("Keys cannot be duplicated");
-            }
-            previous = item;
-        }
-
         KDNode newRoot = this.buildBalanced(sorted);
 
         this.root = newRoot;
@@ -140,10 +132,6 @@ public class KDTree<E> {
         int depth = 0;
 
         while (true) {
-            if (this.contains(data, curr.data)) {
-                throw new IllegalArgumentException("Keys cannot be duplicated");
-            }
-
             int dimension = depth % this.dimensions;
             int result = this.comparator.compare(data, curr.data, dimension);
 
@@ -165,14 +153,6 @@ public class KDTree<E> {
             curr = next;
             depth++;
         }
-    }
-
-    private boolean contains(E first, E second) {
-        for (int i = 0; i < this.dimensions; i++) {
-            if (this.comparator.compare(first, second, i) != 0)
-                return false;
-        }
-        return true;
     }
 
     public List<E> find(E min, E max) {

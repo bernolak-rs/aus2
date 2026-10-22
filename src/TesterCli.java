@@ -72,8 +72,10 @@ public final class TesterCli {
                 break;
             case "tree": {
                 String value = TesterCli.argument(parts).toLowerCase();
-                if (!Set.of("kd", "quad", "both").contains(value)) {
-                    throw new IllegalArgumentException("Vyber strom: kd, quad alebo both");
+                if (!Set.of("kd", "quad", "quadkd", "danysk", "jts", "mimicat13",
+                        "morkev", "plamenabrezova", "mgruben", "both", "all").contains(value)) {
+                    throw new IllegalArgumentException("Vyber strom: kd, quad, quadkd, danysk, jts, "
+                            + "mimicat13, morkev, plamenabrezova, mgruben, both alebo all");
                 }
                 this.tree = value;
                 break;
@@ -134,8 +136,10 @@ public final class TesterCli {
             size N              Počet unikátnych bodov (N >= 0)
             check N             Kontrola každých N vložení (N >= 1)
             range N             Súradnice od 0 do N-1 (N >= 2)
-            depth N             Maximálna hĺbka QuadTree (N >= 0)
-            tree kd|quad|both   Vyber testované stromy
+            depth N             Maximálna hĺbka QuadTree a QuadKDTree (N >= 0)
+            tree NAZOV          kd, quad, quadkd, danysk, jts, mimicat13,
+                                morkev, plamenabrezova, mgruben
+            tree both|all       Pôvodné dva stromy alebo všetkých deväť
             show                Zobraz nastavenia
             help|h|?            Zobraz príkazy
             exit|q|quit         Ukonči tester
@@ -151,9 +155,9 @@ public final class TesterCli {
 
         for (TreeTester.Result result : tester.run()) {
             if (result.error() == null) {
-                System.out.println(result.name() + "OK: seed=" + result.seed() + ", size=" + result.size());
+                System.out.println(result.name() + " OK: seed= " + result.seed() + ", size= " + result.size());
             } else {
-                System.out.println(result.name() + "ZLYHAL: seed=" + result.seed() + ", " + result.error().getMessage());
+                System.out.println(result.name() + " ZLYHAL: seed= " + result.seed() + ", " + result.error().getMessage());
             }
         }
     }
