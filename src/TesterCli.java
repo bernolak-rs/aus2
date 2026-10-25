@@ -8,10 +8,12 @@ public final class TesterCli {
     private long seed = 42L;
     private int seedCount = 1;
     private int pointCount = 10_100;
+    private int areaCount = 1_000;
     private int coordinateLimit = 1_000_000;
-    private int checkEvery = 100;
+    private int checkEvery = 100000;
     private int maxDepth = 20;
     private String tree = "both";
+    private boolean useData = false;
 
     public void start() {
         System.out.println("Tester stromov");
@@ -61,6 +63,9 @@ public final class TesterCli {
             case "size":
                 this.pointCount = TesterCli.integerArgument(parts, 0);
                 break;
+            case "rectangles":
+                this.areaCount = TesterCli.integerArgument(parts, 0);
+                break;
             case "check":
                 this.checkEvery = TesterCli.integerArgument(parts, 1);
                 break;
@@ -78,6 +83,14 @@ public final class TesterCli {
                             + "mimicat13, morkev, plamenabrezova, mgruben, both alebo all");
                 }
                 this.tree = value;
+                break;
+            }
+            case "data": {
+                String value = TesterCli.argument(parts).toLowerCase();
+                if (!Set.of("on", "off").contains(value)) {
+                    throw new IllegalArgumentException("Pouzitie: data on|off");
+                }
+                this.useData = value.equals("on");
                 break;
             }
             case "run":
@@ -122,18 +135,22 @@ public final class TesterCli {
         System.out.println("seed=" + this.seed
                 + ", seeds=" + this.seedCount
                 + ", size=" + this.pointCount
+                + ", rectangles=" + this.areaCount
                 + ", check=" + this.checkEvery
                 + ", range=" + this.coordinateLimit
                 + ", depth=" + this.maxDepth
-                + ", tree=" + this.tree);
+                + ", tree=" + this.tree
+                + ", data=" + (this.useData ? "on" : "off"));
     }
 
     private static void printHelp() {
         System.out.println("""
             run                 Spusti test s aktuálnymi nastaveniami
+            data on|off         CSV body a intervalové find alebo generované body
             seed N|random       Nastav počiatočný seed alebo vyber náhodný
             seeds N             Počet po sebe idúcich seedov (N >= 1, predvolene 1)
-            size N              Počet unikátnych bodov (N >= 0)
+            size N              Počet bodov (N >= 0)
+            rectangles N         Počet obdĺžnikov (N >= 0)
             check N             Kontrola každých N vložení (N >= 1)
             range N             Súradnice od 0 do N-1 (N >= 2)
             depth N             Maximálna hĺbka QuadTree a QuadKDTree (N >= 0)
@@ -150,14 +167,16 @@ public final class TesterCli {
         this.printSettings();
 
         TreeTester tester = new TreeTester(
-                this.seed, this.seedCount, this.pointCount, this.coordinateLimit,
-                this.checkEvery, this.maxDepth, this.tree);
+                this.seed, this.seedCount, this.pointCount, this.areaCount, this.coordinateLimit,
+                this.checkEvery, this.maxDepth, this.tree, this.useData);
 
         for (TreeTester.Result result : tester.run()) {
             if (result.error() == null) {
-                System.out.println(result.name() + " OK: seed= " + result.seed() + ", size= " + result.size());
+                String source = this.useData ? "CSV" : "seed= " + result.seed();
+                System.out.println(result.name() + " OK: " + source + ", size= " + result.size());
             } else {
-                System.out.println(result.name() + " ZLYHAL: seed= " + result.seed() + ", " + result.error().getMessage());
+                String source = this.useData ? "CSV" : "seed= " + result.seed();
+                System.out.println(result.name() + " ZLYHAL: " + source + ", " + result.error().getMessage());
             }
         }
     }

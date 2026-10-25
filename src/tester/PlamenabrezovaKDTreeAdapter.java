@@ -22,6 +22,21 @@ public final class PlamenabrezovaKDTreeAdapter implements StructureAdapter<Point
     }
 
     @Override
+    public List<Point2D> find(Point2D min, Point2D max) {
+        Objects.requireNonNull(min, "Minimum boundaries cannot be null");
+        Objects.requireNonNull(max, "Maximum boundaries cannot be null");
+        RectHV area = new RectHV(min.x(), min.y(), max.x(), max.y());
+        List<Point2D> result = new ArrayList<>();
+        // This implementation returns null for an empty tree.
+        if (!this.tree.isEmpty()) {
+            for (Point2D point : this.tree.range(area)) {
+                result.add(point);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<Point2D> getAll() {
         List<Point2D> result = new ArrayList<>();
         // This implementation returns null for an empty tree.

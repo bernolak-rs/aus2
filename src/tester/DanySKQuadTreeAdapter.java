@@ -30,6 +30,22 @@ public final class DanySKQuadTreeAdapter<E> implements StructureAdapter<E> {
     }
 
     @Override
+    public List<E> find(E min, E max) {
+        Objects.requireNonNull(min, "Minimum boundaries cannot be null");
+        Objects.requireNonNull(max, "Maximum boundaries cannot be null");
+        double minX = this.x.applyAsDouble(min);
+        double minY = this.y.applyAsDouble(min);
+        double maxX = this.x.applyAsDouble(max);
+        double maxY = this.y.applyAsDouble(max);
+        if (minX > maxX || minY > maxY) {
+            throw new IllegalArgumentException("Minimum boundaries cannot exceed maximum boundaries");
+        }
+        // The library excludes upper bounds; the next representable values make them inclusive.
+        return new ArrayList<>(this.tree.query(
+                new double[]{minX, minY}, new double[]{Math.nextUp(maxX), Math.nextUp(maxY)}));
+    }
+
+    @Override
     public List<E> getAll() {
         return new ArrayList<>(this.tree.query(
                 new double[]{-Double.MAX_VALUE, -Double.MAX_VALUE},

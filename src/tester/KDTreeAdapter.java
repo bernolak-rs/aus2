@@ -18,6 +18,11 @@ public final class KDTreeAdapter<E> implements StructureAdapter<E> {
     }
 
     @Override
+    public List<E> find(E min, E max) {
+        return this.tree.find(min, max);
+    }
+
+    @Override
     public List<E> getAll() {
         return this.tree.getAll();
     }

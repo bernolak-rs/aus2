@@ -27,6 +27,29 @@ public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
     }
 
     @Override
+    @SuppressWarnings("unchecked") // JTS exposes untyped objects through its query visitor.
+    public List<E> find(E min, E max) {
+        Envelope lower = Objects.requireNonNull(this.envelopeOf.apply(
+                Objects.requireNonNull(min, "Minimum boundaries cannot be null")), "Envelope cannot be null");
+        Envelope upper = Objects.requireNonNull(this.envelopeOf.apply(
+                Objects.requireNonNull(max, "Maximum boundaries cannot be null")), "Envelope cannot be null");
+        if (lower.isNull() || upper.isNull()
+                || lower.getMinX() > upper.getMaxX() || lower.getMinY() > upper.getMaxY()) {
+            throw new IllegalArgumentException("Minimum boundaries cannot exceed maximum boundaries");
+        }
+        Envelope area = new Envelope(lower.getMinX(), upper.getMaxX(), lower.getMinY(), upper.getMaxY());
+        List<E> result = new ArrayList<>();
+        this.tree.query(area, object -> {
+            E candidate = (E) object;
+            // JTS returns candidates whose envelopes may lie outside the query area.
+            if (area.intersects(this.envelopeOf.apply(candidate))) {
+                result.add(candidate);
+            }
+        });
+        return result;
+    }
+
+    @Override
     @SuppressWarnings("unchecked") // JTS exposes an untyped list of the stored objects.
     public List<E> getAll() {
         return new ArrayList<>(this.tree.queryAll());
