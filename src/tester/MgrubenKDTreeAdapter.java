@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/** Points must lie in the unit square [0, 1] x [0, 1]. */
 public final class MgrubenKDTreeAdapter implements StructureAdapter<Point2D> {
     private final KdTree tree;
 

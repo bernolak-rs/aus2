@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-/** The wrapped JTS tree must contain only objects of type E. */
 public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
     private final Quadtree tree;
     private final Function<? super E, ? extends Envelope> envelopeOf;
@@ -27,7 +26,7 @@ public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
     }
 
     @Override
-    @SuppressWarnings("unchecked") // JTS exposes untyped objects through its query visitor.
+    @SuppressWarnings("unchecked") 
     public List<E> find(E min, E max) {
         Envelope lower = Objects.requireNonNull(this.envelopeOf.apply(
                 Objects.requireNonNull(min, "Minimum boundaries cannot be null")), "Envelope cannot be null");
@@ -41,7 +40,6 @@ public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
         List<E> result = new ArrayList<>();
         this.tree.query(area, object -> {
             E candidate = (E) object;
-            // JTS returns candidates whose envelopes may lie outside the query area.
             if (area.intersects(this.envelopeOf.apply(candidate))) {
                 result.add(candidate);
             }
@@ -50,7 +48,7 @@ public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
     }
 
     @Override
-    @SuppressWarnings("unchecked") // JTS exposes an untyped list of the stored objects.
+    @SuppressWarnings("unchecked") 
     public List<E> getAll() {
         return new ArrayList<>(this.tree.queryAll());
     }

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/** Points must lie in the unit square [0, 1] x [0, 1]. */
 public final class PlamenabrezovaKDTreeAdapter implements StructureAdapter<Point2D> {
     private final KdTree tree;
 
@@ -27,7 +26,6 @@ public final class PlamenabrezovaKDTreeAdapter implements StructureAdapter<Point
         Objects.requireNonNull(max, "Maximum boundaries cannot be null");
         RectHV area = new RectHV(min.x(), min.y(), max.x(), max.y());
         List<Point2D> result = new ArrayList<>();
-        // This implementation returns null for an empty tree.
         if (!this.tree.isEmpty()) {
             for (Point2D point : this.tree.range(area)) {
                 result.add(point);
@@ -39,7 +37,6 @@ public final class PlamenabrezovaKDTreeAdapter implements StructureAdapter<Point
     @Override
     public List<Point2D> getAll() {
         List<Point2D> result = new ArrayList<>();
-        // This implementation returns null for an empty tree.
         if (!this.tree.isEmpty()) {
             for (Point2D point : this.tree.range(new RectHV(0, 0, 1, 1))) {
                 result.add(point);

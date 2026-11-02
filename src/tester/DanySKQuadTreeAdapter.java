@@ -40,7 +40,6 @@ public final class DanySKQuadTreeAdapter<E> implements StructureAdapter<E> {
         if (minX > maxX || minY > maxY) {
             throw new IllegalArgumentException("Minimum boundaries cannot exceed maximum boundaries");
         }
-        // The library excludes upper bounds; the next representable values make them inclusive.
         return new ArrayList<>(this.tree.query(
                 new double[]{minX, minY}, new double[]{Math.nextUp(maxX), Math.nextUp(maxY)}));
     }
@@ -54,7 +53,6 @@ public final class DanySKQuadTreeAdapter<E> implements StructureAdapter<E> {
 
     @Override
     public int size() {
-        // SpatialIndex has no size method; count the objects returned by the tree.
         return this.getAll().size();
     }
 }
