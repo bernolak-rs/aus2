@@ -7,11 +7,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.ToDoubleFunction;
 
+/**
+ * AI DOKUMENTACIA 3.3
+ * 
+ * DanySKQuadTreeAdapter
+ * @param <E>
+ */
 public final class DanySKQuadTreeAdapter<E> implements StructureAdapter<E> {
     private final SpatialIndex<E> tree;
     private final ToDoubleFunction<? super E> x;
     private final ToDoubleFunction<? super E> y;
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     public DanySKQuadTreeAdapter(SpatialIndex<E> tree,
                                  ToDoubleFunction<? super E> x,
                                  ToDoubleFunction<? super E> y) {
@@ -23,12 +32,18 @@ public final class DanySKQuadTreeAdapter<E> implements StructureAdapter<E> {
         }
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public void insert(E object) {
         Objects.requireNonNull(object, "Object cannot be null");
         this.tree.insert(object, this.x.applyAsDouble(object), this.y.applyAsDouble(object));
     }
 
+    /**
+     * AI DOKUMENTACIA 3.4
+     */
     @Override
     public List<E> find(E min, E max) {
         Objects.requireNonNull(min, "Minimum boundaries cannot be null");
@@ -44,6 +59,9 @@ public final class DanySKQuadTreeAdapter<E> implements StructureAdapter<E> {
                 new double[]{minX, minY}, new double[]{Math.nextUp(maxX), Math.nextUp(maxY)}));
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public List<E> getAll() {
         return new ArrayList<>(this.tree.query(
@@ -51,6 +69,9 @@ public final class DanySKQuadTreeAdapter<E> implements StructureAdapter<E> {
                 new double[]{Double.MAX_VALUE, Double.MAX_VALUE}));
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public int size() {
         return this.getAll().size();

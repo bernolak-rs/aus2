@@ -5,6 +5,9 @@ import POIApp.model.Poi;
 
 import java.util.List;
 
+/**
+ * POI data adapter implementation for KD tree
+ */
 public class KDTreeData implements IPoiData {
     private KDTree<Poi> tree;
 
@@ -25,6 +28,6 @@ public class KDTreeData implements IPoiData {
     @Override
     public List<Poi> find(double minLat, double maxLat, double minLon, double maxLon) {
          return tree.find(new Poi(-1, "", minLat, minLon, "", null, null, null),
-                new Poi(-1, "", maxLat, maxLon, "", null, null, null));
+                new Poi(-1, "", maxLat, maxLon, "", null, null, null)).stream().filter(poi -> !poi.isDeleted()).toList();
     }
 }

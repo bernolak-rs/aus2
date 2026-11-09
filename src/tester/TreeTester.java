@@ -26,15 +26,44 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 
+/**
+ * Tests KD tree and Quad tree implementations
+ */
 public final class TreeTester {
+    /**
+     * Represents 2-dimensional point with int values
+     * @param x
+     * @param y
+     */
     private record Point(int x, int y) {
     }
 
+    /**
+     * Represents geographical point loaded from CSV
+     * @param id
+     * @param y
+     * @param x
+     */
     private record DataPoint(long id, double y, double x) {
     }
 
+    /**
+     * Represents rectangular area to search loaded from CSV
+     * @param id
+     * @param min_y
+     * @param min_x
+     * @param max_y
+     * @param max_x
+     */
     private record TestArea(long id, double min_y, double min_x, double max_y, double max_x) { }
 
+    /**
+     * Represents result of a tree test
+     * @param name
+     * @param seed
+     * @param size
+     * @param error
+     */
     public record Result(String name, long seed, int size, Throwable error) {
     }
 
@@ -48,6 +77,18 @@ public final class TreeTester {
     private final String tree;
     private final boolean useData;
 
+    /**
+     * Creates a tree tester with specified testing attributes
+     * @param seed
+     * @param seedCount
+     * @param pointCount
+     * @param areaCount
+     * @param coordinateLimit
+     * @param checkEvery
+     * @param maxDepth
+     * @param tree
+     * @param useData
+     */
     public TreeTester(long seed, int seedCount, int pointCount, int areaCount, int coordinateLimit,
                       int checkEvery, int maxDepth, String tree, boolean useData) {
         this.seed = seed;
@@ -61,6 +102,11 @@ public final class TreeTester {
         this.useData = useData;
     }
 
+    /**
+     * Executes test
+     * Either uses data loaded from csv or generates them for selected seed
+     * @return list of results for the selected tree implementation
+     */
     public List<Result> run() {
         if (this.useData) {
             return this.runForData();
@@ -81,6 +127,12 @@ public final class TreeTester {
         return results;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.5, 3.6
+     * 
+     * Executes test for Data loaded from CSV
+     * @return list of results for the selected tree implementation
+     */
     private List<Result> runForData() {
         try {
             return this.runForData("data/slovakia_nodes.csv", "data/testovacie_oblasti.csv");
@@ -89,6 +141,16 @@ public final class TreeTester {
         }
     }
 
+    /**
+     * AI DOKUMENTACIA 3.5, 3.6
+     * 
+     * Executes test for Data loaded from CSV
+     * Prepares tree adapters and runs data tests on them if they were selected
+     * @param pointsPath path to points CSV
+     * @param areasPath path to areas CSV
+     * @return list of results for the selected tree implementation
+     * @throws IOException
+     */
     public List<Result> runForData(String pointsPath, String areasPath) throws IOException {
         List<TestArea> areas = this.loadAreasFromData(areasPath);
 
@@ -179,15 +241,25 @@ public final class TreeTester {
         return results;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.5, 3.6
+     * 
+     * Tests tree implementation using data
+     * @param <E> type of elements stored in the tested structure
+     * @param name name of tested tree implementation
+     * @param structure structure adapter of a tested structure
+     * @param points list of data points to used for test
+     * @param areas list of areas used to test interval search
+     * @param convert function used to convert
+     * @return result of test
+     */
     private <E> Result runDataTest(String name, StructureAdapter<E> structure,
                                     List<DataPoint> points, List<TestArea> areas,
                                     Function<DataPoint, E> convert) {
         try {
             List<E> objects = points.stream().map(convert).toList();
             new Tester<E>().run(structure, objects, this.checkEvery);
-            // for (E object : objects) {
-            //     structure.insert(object);
-            // }
+
             System.out.println(" Body vlozene do stromu");
             this.checkAreas(structure, points, objects, areas, convert);
             return new Result(name, this.seed, structure.size(), null);
@@ -196,6 +268,19 @@ public final class TreeTester {
         }
     }
 
+    /**
+     * AI DOKUMENTACIA 3.5, 3.6
+     * 
+     * Checks wheter interval find returns expected values.
+     * Checks for expected occurrences in tree structure compared to list structure
+     * Used to detect missing or extra entries in trees
+     * @param <E> type of element stored in tested structure
+     * @param structure adapter of a tested strucure
+     * @param points points to be tested on structure
+     * @param objects list of objects stored in tree
+     * @param areas areas to be tested on structure
+     * @param convert function used to convert Test area to Data points
+     */
     private <E> void checkAreas(StructureAdapter<E> structure, List<DataPoint> points,
                                 List<E> objects, List<TestArea> areas,
                                 Function<DataPoint, E> convert) {
@@ -235,6 +320,13 @@ public final class TreeTester {
         }
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3, 3.5
+     * 
+     * Generates random points using seed and tests selected trees
+     * @param seed
+     * @return list of results
+     */
     private List<Result> runForSeed(long seed) {
         if (this.pointCount > this.coordinateLimit) {
             throw new IllegalArgumentException("Pocet bodov size presahuje range");
@@ -285,10 +377,20 @@ public final class TreeTester {
         return results;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3
+     * 
+     * Checks whether tree was selected for testing
+     * @param name
+     * @return returns true if it was selected otherwise returns false
+     */
     private boolean selected(String name) {
         return this.tree.equals(name) || this.tree.equals("all");
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3
+     */
     private Result runKdTest(List<Point> data, long seed) {
         KDTree<Point> kdTree = new KDTree<>(2, (first, second, axis) ->
                 Integer.compare(axis == 0 ? first.x() : first.y(),
@@ -297,6 +399,9 @@ public final class TreeTester {
         return this.runTest("KDTree", new KDTreeAdapter<>(kdTree), data, seed);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3
+     */
     private Result runQuadTest(List<Point> data, long seed) {
         SpatialAdapter<Point, Integer> spatialAdapter =
                 point -> new Bounds<>(point.x(), point.x(), point.y(), point.y());
@@ -308,6 +413,9 @@ public final class TreeTester {
         return this.runTest("QuadTree", new QuadTreeAdapter<>(quadTree, spatialAdapter), data, seed);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3
+     */
     private Result runQuadKdTest(List<Point> data, long seed) {
         SpatialAdapter<Point, Integer> spatialAdapter =
                 point -> new Bounds<>(point.x(), point.x(), point.y(), point.y());
@@ -321,6 +429,9 @@ public final class TreeTester {
         return this.runTest("QuadKDTree", new QuadKDTreeAdapter<>(quadKdTree, spatialAdapter), data, seed);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3
+     */
     private Result runMimicat13Test(List<Point> data, long seed) {
         var quadTree = new external.QuadTrees.mimicat13.com.github.ryanp102694.QuadTree(
                 10, this.maxDepth, 0, 0, 0, this.coordinateLimit, this.coordinateLimit, null);
@@ -333,6 +444,10 @@ public final class TreeTester {
         return this.runTest("Mimicat13 QuadTree", new Mimicat13QuadTreeAdapter(quadTree), rectangles, seed);
     }
 
+    /**
+     * Creates coordinate operations for integer values
+     * @return coordina operations
+     */
     private static CoordinateOps<Integer> coordinateOps() {
         return new CoordinateOps<>() {
             @Override
@@ -347,6 +462,15 @@ public final class TreeTester {
         };
     }
 
+    /**
+     * Executes insertion and integrity tests on tree structure
+     * @param <E> data type stored in the structure
+     * @param name
+     * @param structure
+     * @param data elements to insert
+     * @param seed
+     * @return results of test
+     */
     private <E> Result runTest(
             String name, StructureAdapter<E> structure, List<E> data, long seed) {
         try {
@@ -357,6 +481,11 @@ public final class TreeTester {
         }
     }
 
+    /**
+     * Generates points to test tree implementations
+     * @param seed seed to generate
+     * @return list of generated points
+     */
     private List<Point> generatePoints(long seed) {
         if (this.coordinateLimit <= 0 || this.pointCount < 0
                 || this.pointCount > (long) this.coordinateLimit * this.coordinateLimit) {
@@ -373,6 +502,12 @@ public final class TreeTester {
         return points;
     }
 
+    /**
+     * Loads points from CSV to be tested on data structures
+     * @param path to CSV
+     * @return list of data points to be tested
+     * @throws IOException
+     */
     private List<DataPoint> loadPointFromData(String path) throws IOException {
         List<DataPoint> points = new ArrayList<>(this.pointCount);
 
@@ -396,6 +531,12 @@ public final class TreeTester {
         return points;
     }
 
+    /**
+     * Loads Areas from CSV file to test interval search methods of each tree
+     * @param path to CSV
+     * @return list of tested areas
+     * @throws IOException
+     */
     private List<TestArea> loadAreasFromData(String path) throws IOException {
         List<TestArea> areas = new ArrayList<>(this.areaCount);
 

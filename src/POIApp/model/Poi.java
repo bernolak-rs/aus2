@@ -2,6 +2,9 @@ package POIApp.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Data class representing POI
+ */
 public class Poi {
     private final long id;
     private String name;
@@ -62,14 +65,5 @@ public class Poi {
 
     public void delete() {
         deleted = true;
-    }
-
-    public void update(String name, String desc, double lat, double lon, String address) {
-        this.name = name;
-        this.description = desc;
-        this.latitude = lat;
-        this.longitude = lon;
-        this.address = address;
-        this.updatedTime = LocalDateTime.now();
     }
 }

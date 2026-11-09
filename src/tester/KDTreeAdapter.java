@@ -17,6 +17,9 @@ public final class KDTreeAdapter<E> implements StructureAdapter<E> {
         this.tree.insert(object);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.4
+     */
     @Override
     public List<E> find(E min, E max) {
         return this.tree.find(min, max);

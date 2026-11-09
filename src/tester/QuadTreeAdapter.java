@@ -21,6 +21,9 @@ public final class QuadTreeAdapter<E, K> implements StructureAdapter<E> {
         this.tree.insert(object);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.4
+     */
     @Override
     public List<E> find(E min, E max) {
         Bounds<K> lower = Objects.requireNonNull(this.spatialAdapter.boundsOf(

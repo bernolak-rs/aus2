@@ -10,13 +10,16 @@ import java.util.List;
 
 import KDTree.KDComparator;
 
+/**
+ * POI data adapter implementation for QuadKD tree
+ */
 public class QuadKDTreeData implements IPoiData {
     private QuadKDTree<Poi, Double> tree;
 
     public QuadKDTreeData() {
         Bounds<Double> bounds = new Bounds<>(-180d, 180d, -90d, 90d);
 
-        SpatialAdapter<Poi, Double> adapter = poi -> new Bounds<>(poi.getLongitude(), poi.getLongitude(), poi.getLatitude(), poi.getLatitude());
+        SpatialAdapter<Poi, Double> adapter = poi -> new Bounds<>(poi.getLatitude(), poi.getLatitude(), poi.getLongitude(), poi.getLongitude());
 
         CoordinateOps<Double> ops = new CoordinateOps<Double>() {
             @Override
@@ -50,6 +53,6 @@ public class QuadKDTreeData implements IPoiData {
 
     @Override
     public List<Poi> find(double minLat, double maxLat, double minLon, double maxLon) {
-        return this.tree.find(new Bounds<Double>(minLat, maxLat, minLon, maxLon));
+        return this.tree.find(new Bounds<Double>(minLat, maxLat, minLon, maxLon)).stream().filter(poi -> !poi.isDeleted()).toList();
     }
 }

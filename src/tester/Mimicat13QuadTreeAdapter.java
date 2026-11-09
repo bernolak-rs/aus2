@@ -9,18 +9,30 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * AI DOKUMENTACIA 3.3 
+ */
 public final class Mimicat13QuadTreeAdapter implements StructureAdapter<RectangleObject> {
     private final QuadTree tree;
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     public Mimicat13QuadTreeAdapter(QuadTree tree) {
         this.tree = Objects.requireNonNull(tree, "Tree cannot be null");
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public void insert(RectangleObject object) {
         this.tree.insert(Objects.requireNonNull(object, "Object cannot be null"));
     }
 
+    /**
+     * AI DOKUMENTACIA 3.4
+     */
     @Override
     public List<RectangleObject> find(RectangleObject min, RectangleObject max) {
         Objects.requireNonNull(min, "Minimum boundaries cannot be null");
@@ -32,6 +44,9 @@ public final class Mimicat13QuadTreeAdapter implements StructureAdapter<Rectangl
                 min.getX(), min.getY(), max.getX() - min.getX(), max.getY() - min.getY()));
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public List<RectangleObject> getAll() {
         List<RectangleObject> result = new ArrayList<>();
@@ -50,6 +65,9 @@ public final class Mimicat13QuadTreeAdapter implements StructureAdapter<Rectangl
         return result;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public int size() {
         return this.tree.getTotalObjects();

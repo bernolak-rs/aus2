@@ -9,22 +9,34 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * AI DOKUMENTACIA 3.3 
+ */
 public final class MorkevKDTreeAdapter<E> implements StructureAdapter<E> {
     private final KdTreeST<E> tree;
     private final Function<? super E, ? extends Point2D> pointOf;
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     public MorkevKDTreeAdapter(KdTreeST<E> tree,
                                Function<? super E, ? extends Point2D> pointOf) {
         this.tree = Objects.requireNonNull(tree, "Tree cannot be null");
         this.pointOf = Objects.requireNonNull(pointOf, "Point function cannot be null");
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public void insert(E object) {
         Objects.requireNonNull(object, "Object cannot be null");
         this.tree.put(this.pointOf.apply(object), object);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.4
+     */
     @Override
     public List<E> find(E min, E max) {
         Point2D lower = this.pointOf.apply(Objects.requireNonNull(min, "Minimum boundaries cannot be null"));
@@ -37,6 +49,9 @@ public final class MorkevKDTreeAdapter<E> implements StructureAdapter<E> {
         return result;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public List<E> getAll() {
         List<E> result = new ArrayList<>();
@@ -46,6 +61,9 @@ public final class MorkevKDTreeAdapter<E> implements StructureAdapter<E> {
         return result;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public int size() {
         return this.tree.size();

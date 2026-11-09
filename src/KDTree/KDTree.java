@@ -3,7 +3,16 @@ package KDTree;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * AI DOKUMENTACIA 2.1
+ * 
+ * KD Tree implementation
+ * @param <E> type of object inserted into a tree
+ */
 public class KDTree<E> {
+    /**
+     * KDNode represents one node in KDTree
+     */
     private class KDNode {
         E data;
         KDNode left;
@@ -19,6 +28,11 @@ public class KDTree<E> {
     private int size;
     private KDComparator<? super E> comparator;
 
+    /**
+     * Creates empty tree
+     * @param dimensions number of dimensions in a tree
+     * @param comparator comparator used to compare nodes for each dimension
+     */
     public KDTree(int dimensions, KDComparator<? super E> comparator) {
         if (dimensions <= 0) {
             throw new IllegalArgumentException("Dimensions cant be non-positive integer");
@@ -28,95 +42,13 @@ public class KDTree<E> {
         this.comparator = comparator;
     }
 
-    public void insert(List<? extends E> data) throws IllegalArgumentException {
-        if (data == null) {
-            throw new IllegalArgumentException("Data inserted to KDTree cannot be null");
-        }
-
-        List<E> sorted = new LinkedList<>(data);
-
-        for (E item : sorted) {
-            if (item == null)
-                throw new IllegalArgumentException("Data inserted to KDTree cannot be null");
-        }
-
-        sorted.sort((a, b) -> this.compareToSort(a, b, 0));
-
-        KDNode newRoot = this.buildBalanced(sorted);
-
-        this.root = newRoot;
-        this.size = sorted.size();
-    }
-
-    private int compareToSort(E first, E second, int dimension) {
-        for (int offset = 0; offset < this.dimensions; offset++) {
-            int axis = (dimension + offset) % this.dimensions;
-            int result = this.comparator.compare(first, second, axis);
-
-            if (result != 0) {
-                return result;
-            }
-        }
-        return 0;
-    }
-
-    private KDNode buildBalanced(List<E> data) {
-        if (data.isEmpty()) {
-            return null;
-        }
-
-        KDNode newRoot = new KDNode(null);
-
-        LinkedList<KDNode> nodes = new LinkedList<>();
-        LinkedList<List<E>> batches = new LinkedList<>();
-        LinkedList<Integer> axes = new LinkedList<>();
-
-        nodes.add(newRoot);
-        batches.add(data);
-        axes.add(0);
-
-        while (!nodes.isEmpty()) {
-            KDNode node = nodes.removeFirst();
-            List<E> points = batches.removeFirst();
-            int axis = axes.removeFirst();
-            int nextAxis = (axis + 1) % this.dimensions;
-
-            points.sort((a, b) -> this.compareToSort(a, b, axis));
-
-            int middle = points.size() / 2;
-            List<E> leftPoints = new LinkedList<>();
-            List<E> rightPoints = new LinkedList<>();
-
-            int index = 0;
-            for (E point : points) {
-                if (index < middle) {
-                    leftPoints.add(point);
-                } else if (index == middle) {
-                    node.data = point;
-                } else {
-                    rightPoints.add(point);
-                }
-                index++;
-            }
-
-            if (!leftPoints.isEmpty()) {
-                node.left = new KDNode(null);
-                nodes.add(node.left);
-                batches.add(leftPoints);
-                axes.add(nextAxis);
-            }
-
-            if (!rightPoints.isEmpty()) {
-                node.right = new KDNode(null);
-                nodes.add(node.right);
-                batches.add(rightPoints);
-                axes.add(nextAxis);
-            }
-        }
-
-        return newRoot;
-    }
-
+    /**
+     * AI DOKUMENTACIA 2.1
+     * 
+     * Inserts element into KD tree, alternates dimensions for each level
+     * @param data to insert
+     * @throws IllegalArgumentException
+     */
     public void insert(E data) throws IllegalArgumentException {
         if (data == null) {
             throw new IllegalArgumentException("Data inserted to KDTree cannot be null");
@@ -155,6 +87,13 @@ public class KDTree<E> {
         }
     }
 
+    /**
+     * Return element that are within bounds
+     * Using modified BFS and ignores irrelevant subtrees
+     * @param min represents minimum point for valid result
+     * @param max represents maximum point for valid result
+     * @return
+     */
     public List<E> find(E min, E max) {
         if (min == null || max == null) {
             throw new NullPointerException("Search boundaries cannot be null");
@@ -203,6 +142,13 @@ public class KDTree<E> {
         return result;
     }
 
+    /**
+     * Checks wheter object is within boundries
+     * @param object to check
+     * @param min minimal boundry
+     * @param max maximal boundry
+     * @return true if lies within range, otherwise returns false
+     */
     private boolean isInRange(E object, E min, E max) {
         for (int dimension = 0; dimension < this.dimensions; dimension++) {
             if (this.comparator.compare(object, min, dimension) < 0
@@ -213,16 +159,23 @@ public class KDTree<E> {
         return true;
     }
 
+    /**
+     * @return size of a tree
+     */
     public int size() {
         return this.size;
     }
 
+    /**
+     * @return true if tree is empty otherwise returns false
+     */
     public boolean isEmpty() {
         return this.size == 0;
     }
 
     /**
      * Helper function for testing
+     * Returns all elements using BFS
      */
     public List<E> getAll() {
         List<E> result = new LinkedList<>();

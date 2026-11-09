@@ -8,16 +8,25 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * AI DOKUMENTACIA 3.3 
+ */
 public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
     private final Quadtree tree;
     private final Function<? super E, ? extends Envelope> envelopeOf;
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     public JTSQuadTreeAdapter(Quadtree tree,
                               Function<? super E, ? extends Envelope> envelopeOf) {
         this.tree = Objects.requireNonNull(tree, "Tree cannot be null");
         this.envelopeOf = Objects.requireNonNull(envelopeOf, "Envelope function cannot be null");
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public void insert(E object) {
         Objects.requireNonNull(object, "Object cannot be null");
@@ -25,6 +34,9 @@ public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
         this.tree.insert(envelope, object);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.4
+     */
     @Override
     @SuppressWarnings("unchecked") 
     public List<E> find(E min, E max) {
@@ -47,12 +59,18 @@ public final class JTSQuadTreeAdapter<E> implements StructureAdapter<E> {
         return result;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     @SuppressWarnings("unchecked") 
     public List<E> getAll() {
         return new ArrayList<>(this.tree.queryAll());
     }
 
+    /**
+     * AI DOKUMENTACIA 3.3 
+     */
     @Override
     public int size() {
         return this.tree.size();

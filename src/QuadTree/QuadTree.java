@@ -4,7 +4,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * AI DOKUMENTACIA 2.2, 2.4, 2.5
+ * 
+ * Implementation of a QuadTree
+ * @param <E> type of elements stored in tree
+ * @param <K> type of coordinate values
+ */
 public class QuadTree<E, K> {
+    /**
+     * AI DOKUMENTACIA 2.4
+     * 
+     * Represents 4 sons of each Quad tree node
+     */
     private enum Quadrant {
         NW,
         NE,
@@ -12,6 +24,12 @@ public class QuadTree<E, K> {
         SW
     }
 
+    /**
+     * AI DOKUMENTACIA 2.4
+     * 
+     * Represents node in QuadTree
+     * Owns its boundaries, LinkedList for data and its children Node references
+     */
     private class QTNode {
         private final Bounds<K> bounds;
         private final LinkedList<E> list = new LinkedList<>();
@@ -24,15 +42,30 @@ public class QuadTree<E, K> {
         private K midX;
         private K midY;
 
+        /**
+         * AI DOKUMENTACIA 2.4
+         * 
+         * Creates QTNode
+         * @param bounds boundaries of new node
+         */
         QTNode(Bounds<K> bounds) {
             this.bounds = bounds;
         }
 
+        /**
+         * AI DOKUMENTACIA 2.4
+         * 
+         * @return true if node is leaf otherwise false
+         */
         boolean isLeaf() {
             return this.nw == null && this.ne == null
                     && this.se == null && this.sw == null;
         }
 
+        /**
+         * @param quadrant of the requested child
+         * @return reference to child at quadrant position
+         */
         QTNode getChild(Quadrant quadrant) {
             return switch (quadrant) {
                 case NW -> this.nw;
@@ -50,6 +83,15 @@ public class QuadTree<E, K> {
     private final QTNode root;
     private int size;
 
+    /**
+     * AI DOKUMENTACIA 2.6, 2.8
+     * 
+     * Creates QuadTree structure
+     * @param bounds boundaries of tree
+     * @param adapter used to get coordinates of an element
+     * @param ops operations to compare coordinates and calculate midpoint
+     * @param maxDepth of tree
+     */
     public QuadTree(Bounds<K> bounds, SpatialAdapter<E, K> adapter, CoordinateOps<K> ops, int maxDepth) {
         if (bounds == null || bounds.minX() == null || bounds.maxX() == null
                 || bounds.minY() == null || bounds.maxY() == null) {
@@ -70,6 +112,13 @@ public class QuadTree<E, K> {
         this.root = new QTNode(bounds);
     }
 
+    /**
+     * AI DOKUMENTACIA 2.4, 2.7
+     * 
+     * Inserts a point into QuadTree
+     * Goes down tree structure through appropriate nodes until finds empty list node or reaches max depth and puts data into KDTree
+     * @param object to insert
+     */
     public void insert(E object) {
         if (object == null) {
             throw new NullPointerException("Object cannot be null");
@@ -128,6 +177,15 @@ public class QuadTree<E, K> {
         }
     }
 
+    /**
+     * AI DOKUMENTACIA 2.7
+     * 
+     * Finds quadrant that matches coordinates
+     * @param node which quadrants are being evaluated
+     * @param x coordinate of a point we are trying to insert
+     * @param y coordinate of a point we are trying to insert
+     * @return Quadrant that matches our coordinates in node
+     */
     private Quadrant getQuadrant(QTNode node, K x, K y) {
         boolean west = this.ops.compare(x, node.midX) < 0;
         boolean north = this.ops.compare(y, node.midY) >= 0;
@@ -139,6 +197,12 @@ public class QuadTree<E, K> {
         }
     }
 
+    /**
+     * AI DOKUMENTACIA 2.4, 2.7
+     * 
+     * Splits node into 4 children using midpoint
+     * @param node to split
+     */
     private void split(QTNode node) {
         Bounds<K> b = node.bounds;
 
@@ -158,6 +222,15 @@ public class QuadTree<E, K> {
      * Find metody
      */
 
+    /**
+     * Find methods
+     */
+
+    /**
+     * Finds elements in defined rectangular area, uses modified BFS search that skips nodes that don't intersect searched area
+     * @param area we are searching
+     * @return list of elements in area
+     */
     public List<E> find(Bounds<K> area) {
         if (area == null || area.minX() == null || area.maxX() == null
                 || area.minY() == null || area.maxY() == null) {
@@ -205,6 +278,12 @@ public class QuadTree<E, K> {
         return result;
     }
 
+    /**
+     * Checks if 2 boundaries intersect each other
+     * @param first area
+     * @param second area
+     * @return true if they intersect and false if they don't
+     */
     private boolean intersects(Bounds<K> first, Bounds<K> second) {
         return this.ops.compare(first.minX(), second.maxX()) <= 0
             && this.ops.compare(first.maxX(), second.minX()) >= 0
@@ -212,17 +291,27 @@ public class QuadTree<E, K> {
             && this.ops.compare(first.maxY(), second.minY()) >= 0;
     }
 
+    // Helper methods
     /**
-     * Pomocne metody
+     * @return all elements from tree
      */
     public List<E> getAll() {
         return this.find(this.root.bounds);
     }
-
+    /**
+     * AI DOKUMENTACIA 2.4
+     * 
+     * @return size of tree
+     */
     public int size() {
         return this.size;
     }
 
+    /**
+     * AI DOKUMENTACIA 2.4
+     * 
+     * @return true if tree is empty otherwise returns false
+     */
     public boolean isEmpty() {
         return this.size == 0;
     }

@@ -4,6 +4,12 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 
+/**
+ * AI DOKUMENTACIA 3.1
+ * 
+ * Used to test tree structures easily with CLI
+ * Allows to change parameters of tests without the need to change source code
+ */
 public final class TesterCli {
     private long seed = 42L;
     private int seedCount = 1;
@@ -15,6 +21,11 @@ public final class TesterCli {
     private String tree = "both";
     private boolean useData = false;
 
+    /**
+     * AI DOKUMENTACIA 3.1
+     * 
+     * Starts CLI application and displays options
+     */
     public void start() {
         System.out.println("Tester stromov");
         TesterCli.printHelp();
@@ -46,6 +57,13 @@ public final class TesterCli {
         }
     }
 
+    /**
+     * AI DOKUMENTACIA 3.1, 3.3
+     * 
+     * Handles possible commands received from user input
+     * @param line user input
+     * @return return true to continue testing and false to exit
+     */
     private boolean handleCommand(String line) {
         String[] parts = line.split(" ");
         String command = parts[0].toLowerCase();
@@ -116,6 +134,13 @@ public final class TesterCli {
         return true;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.1
+     * 
+     * Handles string argument of a command
+     * @param parts
+     * @return argument passed with command
+     */
     private static String argument(String[] parts) {
         if (parts.length != 2) {
             throw new IllegalArgumentException("Pouzitie: " + parts[0] + " <hodnota>");
@@ -123,6 +148,14 @@ public final class TesterCli {
         return parts[1];
     }
 
+    /**
+     * AI DOKUMENTACIA 3.1
+     * 
+     * Parses integer arguments
+     * @param parts
+     * @param minimum
+     * @return validated integer argument
+     */
     private static int integerArgument(String[] parts, int minimum) {
         int value = Integer.parseInt(TesterCli.argument(parts));
         if (value < minimum) {
@@ -131,6 +164,11 @@ public final class TesterCli {
         return value;
     }
 
+    /**
+     * AI DOKUMENTACIA 3.1
+     * 
+     * Prints current config used for test
+     */
     private void printSettings() {
         System.out.println("seed=" + this.seed
                 + ", seeds=" + this.seedCount
@@ -143,6 +181,11 @@ public final class TesterCli {
                 + ", data=" + (this.useData ? "on" : "off"));
     }
 
+    /**
+     * AI DOKUMENTACIA 3.1, 3.3
+     * 
+     * Prints command options
+     */
     private static void printHelp() {
         System.out.println("""
             run                 Spusti test s aktuálnymi nastaveniami
@@ -163,6 +206,12 @@ public final class TesterCli {
         """);
     }
 
+    /**
+     * AI DOKUMENTACIA 3.1
+     * 
+     * Runs test with current configuration
+     * Creates Tree Tester and runs selected tests. Prints results of test and structure size or error message
+     */
     private void runTests() {
         this.printSettings();
 
